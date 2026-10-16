@@ -6,7 +6,7 @@ Follow the lab handout for the full instructions.
 
 ## About the program
 
-A task manager. It adds tasks with a priority, marks them complete, lists pending tasks in priority order, searches by keyword, suggests a task to do next, and saves tasks to tasks.pkl and tasks.json.
+A task manager. It adds tasks with a priority, marks them complete, lists pending tasks in priority order, searches by keyword, suggests a task to do next, and saves tasks to JSON files (`tasks_saved.json` and `tasks.json`; the original version used `tasks.pkl`, which was replaced because pickle is unsafe).
 
 The code works, but only just. It has quality, style and security problems of the kind Pylint, Flake8 and Bandit are built to find.
 
@@ -53,3 +53,51 @@ The code works, but only just. It has quality, style and security problems of th
 **Target:** aim for a Pylint score above 9.5 on your final file. A perfect 10.00/10 is very good.
 
 Be ready to explain the bugs you found and how you fixed them. You may be called on to present.
+
+---
+
+## My Submission
+
+### Results
+
+| Tool | Before | After |
+| ---- | ------ | ----- |
+| Pylint | 5.09 / 10 | **10.00 / 10** |
+| Bandit | 1 High, 1 Medium, 2 Low | **0 issues** |
+| Flake8 | 4 issues | **0 issues** |
+
+### What was fixed
+
+- **Bandit:** shell command injection in `remindByEmail` (B605), unsafe `pickle` (B301/B403) and `random.choice` (B311).
+- **Flake8:** E225, E303, E261, E231.
+- **Pylint:** snake_case names, missing docstrings, mutable default argument, inconsistent return, missing file encoding, and `main()` running on import.
+
+### Files
+
+| File | Purpose |
+| ---- | ------- |
+| `todo_manager.py` | Cleaned and fixed program |
+| `issues.md` | Table of all issues found and how each was fixed |
+| `reflection.md` | Answers to the reflection questions |
+| `pylint_report.txt`, `bandit_report.txt`, `flake8_report.txt` | Final reports (after fixes) |
+| `reports/before/` | Reports on the original code |
+| `reports/after/` | Reports on the fixed code |
+
+### Commits
+
+1. Original code, README and baseline reports
+2. Bandit fixes
+3. Flake8 fixes
+4. Pylint fixes
+5. After-fix reports, `issues.md` and `reflection.md`
+
+### How to run and re-check
+
+```
+python todo_manager.py
+python -m pylint todo_manager.py
+python -m bandit -r todo_manager.py
+python -m flake8 todo_manager.py
+```
+
+Note: two Bandit Low warnings (B404, B603) are suppressed with `# nosec` and a written justification; see `issues.md`.

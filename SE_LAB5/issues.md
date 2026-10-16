@@ -14,7 +14,7 @@ Line numbers refer to the **original** file (before fixes). Reports are in `repo
 | ----- | ---- | ------- | ----------- | ------------ |
 | OS command injection via `os.system` (Bandit B605, **High**) | Security | 57 | `remindByEmail` builds a shell command by concatenating the caller-supplied `address`. An input like `a@b.com; rm -rf ~` would run arbitrary commands. | Validate `address` with a strict email regex, then call `subprocess.run([...], shell=False)` with a fixed argument list and feed `tasks.json` through `stdin` instead of shell redirection. |
 | Unsafe deserialisation with `pickle.load` (Bandit B301, **Medium**) | Security | 47 | Unpickling can execute arbitrary code if `tasks.pkl` is tampered with. | Replaced pickle with JSON in `save_tasks` / `load_tasks`; integer task ids are restored on load because JSON keys are strings. |
-| Mutable default argument `labels=[]` (Pylint W0102) | Bug | 11 | The same list object is shared across every call, so labels leak between tasks. | Default changed to `None`; a fresh list is created inside the function and stored on the task. |
+| Mutable default argument `labels=[]` (Pylint W0102) | Bug | 11 | Python creates the default list once and reuses it on every call, so any call that omits `labels` shares (and would keep growing) the same list instead of getting a fresh one. | Default changed to `None`; a fresh list is created inside the function and stored on the task. |
 | `import pickle` (Bandit B403, Low) | Security | 3 | Flags use of the pickle module. | Removed with the pickle-to-JSON change. |
 | `random.choice` (Bandit B311, Low) | Security | 70 | `random` is not a cryptographically secure generator. | Switched to `secrets.choice`. |
 | Latent crash on empty list | Bug | 70 | `random.choice([])` raises `IndexError` once every task is complete (not tool-reported; found while reviewing). | Added an `if pending:` guard with a friendly message. |
@@ -37,4 +37,8 @@ Two Bandit Low findings are intentionally suppressed with `# nosec` and a justif
 
 ## Behaviour change to be aware of
 
-`save_tasks` now writes `tasks_saved.json` instead of `tasks.pkl` (pickle was removed). Output of the demo is otherwise identical.
+The demo prints the same output as before, with these intended differences:
+
+- `save_tasks` now writes `tasks_saved.json` instead of `tasks.pkl` (pickle was removed).
+- Each task in the JSON files now also has a `"labels"` field (the `labels` argument was previously accepted but never stored).
+- The "Try this next" line is picked at random from the pending tasks, so it can differ between runs (this was also true of the original).
