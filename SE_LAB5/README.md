@@ -78,6 +78,7 @@ Be ready to explain the bugs you found and how you fixed them. You may be called
 | ---- | ------- |
 | `todo_manager.py` | Cleaned and fixed program |
 | `issues.md` | Table of all issues found and how each was fixed |
+| `Lab5_Issue_Table.docx` | The same issue table as a Word document |
 | `reflection.md` | Answers to the reflection questions |
 | `pylint_report.txt`, `bandit_report.txt`, `flake8_report.txt` | Final reports (after fixes) |
 | `reports/before/` | Reports on the original code |
@@ -90,6 +91,7 @@ Be ready to explain the bugs you found and how you fixed them. You may be called
 3. Flake8 fixes
 4. Pylint fixes
 5. After-fix reports, `issues.md` and `reflection.md`
+6. Update README, `issues.md` and `reflection.md`, and add the issue table as a Word document
 
 ### How to run and re-check
 
