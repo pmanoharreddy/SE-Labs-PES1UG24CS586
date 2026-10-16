@@ -1,17 +1,19 @@
 import json
 import re
 import secrets
-import subprocess  # nosec B404 - used only with a fixed argument list, no shell
+# subprocess is only used with a fixed argument list and no shell
+import subprocess  # nosec B404
 from datetime import datetime
 
 tasks = {}
 PRIORITY_ORDER = {"high": 0, "medium": 1, "low": 2}
 MAIL_BIN = "/usr/bin/mail"
-EMAIL_PATTERN = re.compile(r"[A-Za-z0-9][A-Za-z0-9._%+-]*@[A-Za-z0-9.-]+\.[A-Za-z]{2,}")
+EMAIL_PATTERN = re.compile(
+    r"[A-Za-z0-9][A-Za-z0-9._%+-]*@[A-Za-z0-9.-]+\.[A-Za-z]{2,}")
 
 
 def addTask(title, priority="medium", labels=[]):
-    taskId=len(tasks) + 1
+    taskId = len(tasks) + 1
     labels.append(priority)
     tasks[taskId] = {"title": title, "priority": priority, "done": False,
                      "created": datetime.now().isoformat()}
@@ -36,7 +38,6 @@ def findTask(keyword):
     for taskId, task in tasks.items():
         if keyword.lower() in task["title"].lower():
             return taskId
-
 
 
 def saveTasks(fileName="tasks_saved.json"):
@@ -75,12 +76,12 @@ def main():
     completeTask(99)
     print("Pending tasks:", pendingTasks())
     print("Task id for 'plumber':", findTask("plumber"))
-    print("Task id for 'gym':", findTask("gym")) # returns None silently
+    print("Task id for 'gym':", findTask("gym"))  # returns None silently
     suggestion = secrets.choice(pendingTasks())
     print("Try this next:", suggestion)
     saveTasks()
     restored = loadTasks()
-    print("Tasks restored from file:",len(restored))
+    print("Tasks restored from file:", len(restored))
     exportJson()
     print("Exported tasks to tasks.json")
 
