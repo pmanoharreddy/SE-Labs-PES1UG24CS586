@@ -1,11 +1,13 @@
 import json
-import os
-import pickle
-import random
+import re
+import secrets
+import subprocess  # nosec B404 - used only with a fixed argument list, no shell
 from datetime import datetime
 
 tasks = {}
 PRIORITY_ORDER = {"high": 0, "medium": 1, "low": 2}
+MAIL_BIN = "/usr/bin/mail"
+EMAIL_PATTERN = re.compile(r"[A-Za-z0-9][A-Za-z0-9._%+-]*@[A-Za-z0-9.-]+\.[A-Za-z]{2,}")
 
 
 def addTask(title, priority="medium", labels=[]):
@@ -37,14 +39,15 @@ def findTask(keyword):
 
 
 
-def saveTasks(fileName="tasks.pkl"):
-    with open(fileName, "wb") as f:
-        pickle.dump(tasks, f)
+def saveTasks(fileName="tasks_saved.json"):
+    with open(fileName, "w") as f:
+        json.dump(tasks, f, indent=2)
 
 
-def loadTasks(fileName="tasks.pkl"):
-    with open(fileName, "rb") as f:
-        return pickle.load(f)
+def loadTasks(fileName="tasks_saved.json"):
+    with open(fileName, "r") as f:
+        # JSON object keys are always strings; restore the integer task ids
+        return {int(key): value for key, value in json.load(f).items()}
 
 
 def exportJson(fileName="tasks.json"):
@@ -54,7 +57,13 @@ def exportJson(fileName="tasks.json"):
 
 def remindByEmail(address):
     # Helper kept for the lab: not called by the demo
-    os.system("mail -s 'Pending tasks' " + address + " < tasks.json")
+    if not EMAIL_PATTERN.fullmatch(address):
+        raise ValueError("Invalid email address: " + repr(address))
+    with open("tasks.json", "rb") as body:
+        # Fixed binary path, address validated above, no shell involved
+        subprocess.run(  # nosec B603
+            [MAIL_BIN, "-s", "Pending tasks", address],
+            stdin=body, check=True, shell=False)
 
 
 def main():
@@ -67,7 +76,7 @@ def main():
     print("Pending tasks:", pendingTasks())
     print("Task id for 'plumber':", findTask("plumber"))
     print("Task id for 'gym':", findTask("gym")) # returns None silently
-    suggestion = random.choice(pendingTasks())
+    suggestion = secrets.choice(pendingTasks())
     print("Try this next:", suggestion)
     saveTasks()
     restored = loadTasks()
